@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: moneyflix-app
+    restart: unless-stopped
+    tty: true
+    working_dir: /var/www/html/
+    volumes:
+      - ./src:/var/www/html/
+    networks:
+      - moneyflix-network
+    depends_on:
+      - db
+      - redis
+
+  webserver:
+    image: nginx:alpine
+    container_name: moneyflix-webserver
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src:/var/www/html/
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - moneyflix-network
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8.0
+    container_name: moneyflix-db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: moneyflix
+      MYSQL_ROOT_PASSWORD: secret_root_password
+      MYSQL_USER: moneyflix_user
+      MYSQL_PASSWORD: secret_password
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - moneyflix-network
+
+  redis:
+    image: redis:alpine
+    container_name: moneyflix-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - moneyflix-network
+
+networks:
+  moneyflix-network:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local

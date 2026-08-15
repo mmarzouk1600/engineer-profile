@@ -1,0 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Legacy front theme assets (loaded separately in front.blade.php) still
+   apply too; these Tailwind layers power the new Pinterest-style pages. */

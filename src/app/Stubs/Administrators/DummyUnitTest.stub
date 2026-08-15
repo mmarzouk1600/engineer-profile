@@ -1,0 +1,62 @@
+<?php
+
+namespace Tests\Feature;
+
+use Database\Factories\DummyModelFactory;
+use Faker\Factory as Faker;
+
+class DummyUnitTestCrud extends BaseCase
+{
+    /** @test */
+    public function admin_can_view_all_DummyCrudNames()
+    {
+        $this->actingAs($this->admin);
+        $DummyCrudName = DummyModelFactory::new()->create();
+        $response = $this->get(route('admin.DummyCrudName.index',['isDataTable'=>1],true));
+        $response->assertStatus(200);
+DummyAssertSee
+    }
+
+    /** @test */
+    public function admin_can_view_one_DummyCrudName()
+    {
+        $this->actingAs($this->admin);
+        $DummyCrudName = DummyModelFactory::new()->create();
+        $response = $this->get(route('admin.DummyCrudName.show',['DummyCrudName'=>$DummyCrudName->id],false));
+        $response->assertStatus(200);
+DummyAssertSee
+    }
+
+    /** @test */
+    public function admin_can_add_one_DummyCrudName()
+    {
+        $this->actingAs($this->admin);
+        $DummyCrudName = DummyModelFactory::new()->make();
+        $response = $this->post(route('admin.DummyCrudName.store',[],false),$DummyCrudName->toArray());
+        $response->assertRedirect(route('admin.DummyCrudName.index'));
+DummyAssertDatabaseHasForCreate
+    }
+
+
+    /** @test */
+    public function admin_can_update_one_DummyCrudName()
+    {
+        $faker = Faker::create();
+        $this->actingAs($this->admin);
+        $DummyCrudName = DummyModelFactory::new()->create();
+        $Updated = DummyModelFactory::new()->make();
+        $response = $this->put(route('admin.DummyCrudName.update',[$DummyCrudName->id],false),$Updated->toArray());
+        $response->assertRedirect();
+DummyAssertDatabaseHas
+    }
+
+    /** @test */
+    public function admin_can_delete_one_DummyCrudName()
+    {
+        $this->actingAs($this->admin);
+        $DummyCrudName = DummyModelFactory::new()->create();
+        $response = $this->delete(route('admin.DummyCrudName.destroy',[$DummyCrudName->id],false));
+        $response->assertRedirect(route('admin.DummyCrudName.index'));
+DummyAssertDatabaseMissing
+    }
+}

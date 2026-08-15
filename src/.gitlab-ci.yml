@@ -1,0 +1,241 @@
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|main|staging)$/'
+      when: always
+    - when: never
+
+stages: 
+  - build
+  - push
+  - deploy
+  - notify_failure
+  - rollback
+
+variables:
+  APP_NAME: $CI_PROJECT_NAME
+  VERSION_ID: latest
+
+  # will be overridden by rules:variables
+  PORT: ""
+  SERVER_IP: ""
+  HARBOR_FOLDER: ""
+  WORKING_DIR: ""
+ 
+  APP_IMAGE: "harbor.mu.edu.sa/${APP_NAME}/${HARBOR_FOLDER}${APP_NAME}-app"
+  WEB_IMAGE: "harbor.mu.edu.sa/${APP_NAME}/${HARBOR_FOLDER}${APP_NAME}-webserver"
+
+.ssh_setup: &ssh_setup
+  - 'which ssh-agent || (apt-get update -y && apt-get install openssh-client -y)'
+  - eval $(ssh-agent -s)
+  - ssh-add <(echo "$STAGING_SSH_PRIVATE_KEY")
+  - mkdir -p ~/.ssh
+  - echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+
+.docker_login: &docker_login
+  - echo "Setting up Docker authentication"
+  - echo "$HARBOR_PASSWORD" | docker login harbor.mu.edu.sa -u "$HARBOR_USER" --password-stdin
+
+.set_version: &set_version
+  - export VERSION="${VERSION_ID}.${CI_PIPELINE_IID}"
+  - echo "$VERSION" > version-file.txt
+
+.env_rules: &env_rules
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^(master|main)$/'
+      variables:
+        PORT: "95"
+        SERVER_IP: "172.25.1.114"
+        HARBOR_FOLDER: "prod/"
+        WORKING_DIR: "/production/backend/$CI_PROJECT_NAME"
+    - if: '$CI_COMMIT_BRANCH == "staging"'
+      variables:
+        PORT: "95"
+        SERVER_IP: "172.25.1.131"
+        HARBOR_FOLDER: "stg/"
+        WORKING_DIR: "/production/backend/$CI_PROJECT_NAME"
+    - when: never
+
+build:
+  stage: build
+  tags: [shell-runner-1]
+  <<: *env_rules
+  before_script:
+    - *docker_login
+    - *set_version
+    - *ssh_setup
+    - mkdir -p .env-temp
+    - |
+      echo "Checking if .env exists on target server..."
+      CHECK_ENV=$(ssh -o StrictHostKeyChecking=no devops@"$SERVER_IP" "[ -f $WORKING_DIR/.env ] && echo exists || echo missing")
+      if [ "$CHECK_ENV" = "exists" ]; then
+        echo ".env found. Downloading from server..."
+        scp -o StrictHostKeyChecking=no devops@"$SERVER_IP":"$WORKING_DIR/.env" .env-temp/.env
+        cp .env-temp/.env .env
+      else
+        echo ".env not found. Using ENV_FILE from CI variables..."
+        echo "$ENV_FILE" | base64 -d > .env
+      fi
+  script:
+    - docker build -t "$APP_IMAGE:$VERSION" -f ./docker/php/Dockerfile .
+    - docker build -t "$WEB_IMAGE:$VERSION" -f ./docker/nginx/Dockerfile .
+  artifacts:
+    paths: [version-file.txt]
+
+push: 
+  stage: push
+  tags: [shell-runner-1]
+  needs: ["build"]
+  <<: *env_rules
+  before_script:
+    - *docker_login
+    - *set_version
+  script:
+    - docker push "$APP_IMAGE:$VERSION"
+    - docker push "$WEB_IMAGE:$VERSION"
+
+deploy:
+  stage: deploy
+  tags: [shell-runner-1]
+  needs: ["push"]
+  <<: *env_rules
+  before_script:
+    - *set_version
+    - *ssh_setup
+  script:
+    - |
+      echo "Ensuring WORKING_DIR exists..."
+      CHECK_DIR=$(ssh -o StrictHostKeyChecking=no devops@"$SERVER_IP" "[ -d '$WORKING_DIR' ] && echo exists || echo missing")
+      if [ "$CHECK_DIR" = "missing" ]; then
+        echo "$ESERV_PASS" | ssh -o StrictHostKeyChecking=no devops@"$SERVER_IP" "
+          sudo -S mkdir -p '$WORKING_DIR' &&
+          sudo -S chown -R devops:www-data '$WORKING_DIR'
+        "
+      fi
+
+    - |
+      echo "Ensuring storage exists..."
+      CHECK_STORAGE=$(ssh -o StrictHostKeyChecking=no devops@"$SERVER_IP" "[ -d '$WORKING_DIR/storage' ] && echo exists || echo missing")
+      if [ "$CHECK_STORAGE" = "missing" ]; then
+        echo "$ESERV_PASS" | ssh -o StrictHostKeyChecking=no devops@"$SERVER_IP" "
+          sudo -S mkdir -p '$WORKING_DIR/storage' &&
+          sudo -S chown -R devops:www-data '$WORKING_DIR/storage'
+        "
+        scp -o StrictHostKeyChecking=no -r storage/* devops@"$SERVER_IP":"$WORKING_DIR/storage/"
+      fi
+
+    - echo "$ESERV_PASS" | ssh -o StrictHostKeyChecking=no devops@"$SERVER_IP" "sudo -S chown -R www-data:www-data '$WORKING_DIR/storage'"
+
+    - rsync -avz -e "ssh -o StrictHostKeyChecking=no" ./docker-compose-prod devops@"$SERVER_IP":"$WORKING_DIR/docker-compose.yml"
+
+    - |
+      ssh -o StrictHostKeyChecking=no devops@"$SERVER_IP" "
+        docker inspect --format='{{ index .Config.Image }}' ${APP_NAME}-app | awk -F':' '{print \$NF}' > $WORKING_DIR/last_working_version.txt
+      "
+
+    - |
+      
+      ssh -o StrictHostKeyChecking=no devops@"$SERVER_IP" "
+        echo $HARBOR_PASSWORD | docker login harbor.mu.edu.sa -u $HARBOR_USER --password-stdin &&
+        cd $WORKING_DIR &&
+        export DC_IMAGE_APP=$APP_IMAGE &&
+        export DC_IMAGE_WEB=$WEB_IMAGE &&
+        export DC_IMAGE_TAG=$VERSION &&
+        export CONTAINER_NAME=$APP_NAME &&
+        export DOCKER_PORT=$PORT &&
+        export NETWORK_SUBNET=172.$PORT.0.0/24 &&
+        export NETWORK_GATEWAY=172.$PORT.0.1 &&
+        docker compose -f docker-compose.yml down &&
+        docker compose -f docker-compose.yml up -d ||
+        (
+          echo '⚠️ New deployment failed! Rolling back...' &&
+          export OLD_VERSION=\$(cat $WORKING_DIR/last_working_version.txt) &&
+          export DC_IMAGE_TAG=\$OLD_VERSION &&
+          docker compose -f docker-compose.yml up -d
+        )
+      "
+
+rollback_last_version:
+  stage: rollback
+  tags: [shell-runner-1]
+  when: manual
+  <<: *env_rules
+  before_script:
+    - *ssh_setup
+  script:
+    - |
+      ssh -o StrictHostKeyChecking=no devops@"$SERVER_IP" "
+        cd $WORKING_DIR &&
+        export DC_IMAGE_APP=$APP_IMAGE &&
+        export DC_IMAGE_WEB=$WEB_IMAGE &&
+        export CONTAINER_NAME=$APP_NAME &&
+        export DOCKER_PORT=$PORT &&
+        export NETWORK_SUBNET=172.$PORT.0.0/24 &&
+        export NETWORK_GATEWAY=172.$PORT.0.1 &&
+        export OLD_VERSION=\$(cat $WORKING_DIR/last_working_version.txt) &&
+        export DC_IMAGE_TAG=\$OLD_VERSION &&
+        docker compose -f docker-compose.yml down &&
+        docker compose -f docker-compose.yml up -d
+      "
+
+###############################################################################
+
+# Notification on Failure via Email
+
+send_failure_email:
+  stage: notify_failure
+  image: harbor.mu.edu.sa/ci/mu-ci:1.0
+  tags: [shell-runner-1]
+  allow_failure: true
+  when: on_failure
+
+  before_script:
+    - apk add --no-cache msmtp ca-certificates
+    - |
+      case "$CI_COMMIT_BRANCH" in
+        master|main) ENV_NAME="production" ;;
+        staging)     ENV_NAME="staging" ;;
+        *)           ENV_NAME="$CI_COMMIT_BRANCH" ;;
+      esac
+      export ENV_NAME
+
+  script:
+    - |
+      cat <<EOF > ~/.msmtprc
+      defaults
+      auth           on
+      tls            on
+      tls_starttls   on
+      tls_trust_file /etc/ssl/certs/ca-certificates.crt
+      logfile        ~/.msmtp.log
+
+      account        outlook
+      host           smtp.office365.com
+      port           587
+      from           ${SMTP_USER}
+      user           ${SMTP_USER}
+      password       ${SMTP_PASS}
+
+      account default : outlook
+      EOF
+    - chmod 600 ~/.msmtprc
+
+    - |
+      cat <<EOF > failure_email.txt
+      Subject: [CI/CD FAILURE] ${CI_PROJECT_NAME} (${ENV_NAME})
+      To: ${TO_EMAILS}
+      From: ${SMTP_USER}
+
+      🚨 Pipeline FAILED for project: ${CI_PROJECT_NAME}
+      Environment : ${ENV_NAME}
+      Branch      : ${CI_COMMIT_BRANCH}
+      Commit SHA  : ${CI_COMMIT_SHORT_SHA}
+      Commit Msg  : ${CI_COMMIT_MESSAGE}
+      Author      : ${GITLAB_USER_NAME}
+
+      Pipeline: ${CI_PIPELINE_URL}
+      Job     : ${CI_JOB_URL}
+      EOF
+
+    - msmtp -a outlook "${TO_EMAIL}" < failure_email.txt || true

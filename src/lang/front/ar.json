@@ -1,0 +1,158 @@
+{
+    "authenticatedLayout": {
+        "Hello": "مرحبا",
+        "Profile": "الملف الشخصي",
+        "Sign Out": "تسجيل الخروج",
+        "Home": "الرئيسية",
+        "Create Ticket": "إنشاء تذكرة",
+        "Develop the IT Deanship at Al-Majmaah University": "تطوير عمادة تقنية المعلومات بجامعة المجمعة"
+    },
+    "welcome": {
+        "Home": "الرئيسية",
+        "Open Tickets": "التذاكر المفتوحة",
+        "Closed Tickets": "التذاكر المغلقة",
+        "Create New Support Ticket": "انشاء تذكرة دعم جديدة",
+        "#": "م",
+        "Ticket Number": "رقم التذكرة",
+        "Title": "العنوان",
+        "Type": "النوع",
+        "Closed Date": "تاريخ الاغلاق",
+        "Rating": "التقييم",
+        "Actions": "الاجراءات",
+        "Not Rated": "لم يتم التقييم",
+        "Details": "التفاصيل",
+        "Service Rating": "تقييم الخدمة",
+        "View Rating": "عرض التقييمات",
+        "What is your rating for the service?": "ماهو تقيمك للخدمة ؟",
+        "Please write your feedback": "فضلا كتابة ملاحظاتك",
+        "The notes": "الملاحظات",
+        "Confirm": "تأكيد",
+        "Cancel": "إلغاء",
+        "Close": "إغلاق",
+        "Unsatisfied": "غير راضي",
+        "Acceptable": "مقبول",
+        "Good": "جيد",
+        "Excellent": "ممتاز",
+        "There are no tickets": "لا توجد اشعارات",
+        "Display the reviews that indicate the level of satisfaction:": "عرض التقييمات التي توضح مدى الرضى:",
+        "Please rate your satisfaction:": "فضلا توضيح مدى رضائك:"
+    },
+    "updateProfile": {
+        "Profile": "الصفحة الشخصية",
+        "Faculty Member": "عضو هيئة تدريس",
+        "Employee": "موظف",
+        "Student": "طالب",
+        "External Beneficiary": "مستفيد خارجي",
+        "Personal Information": "المعلومات الشخصية",
+        "Data must be completed and confirmed to use the system": "يجب استكمال البيانات والتأكيد عليها حتى يتسنى لك استخدام النظام",
+        "Name": "الاسم",
+        "Gender": "النوع",
+        "University ID": "الرقم الجامعي",
+        "Employee ID": "الرقم الوظيفي",
+        "Mobile Number": "رقم الجوال",
+        "Email": "البريد الإلكتروني",
+        "Extension Number": "رقم التحويلة",
+        "Building Name": "اسم المبنى",
+        "Office Number": "رقم المكتب",
+        "Save": "حفظ",
+        "Back": "رجوع"
+    },
+    "showTicket": {
+        "View ticket": "عرض التذكرة",
+        "Ticket Information": "معلومات التذكرة",
+        "Attachments": "المرفقات",
+        "Ticket Number": "رقم التذكرة",
+        "Ticket Opening Date": "تاريخ فتح التذكرة",
+        "Status": "الحالة",
+        "Type": "النوع",
+        "Title": "العنوان",
+        "Description": "الوصف",
+        "Referrals and Replies": "الاحالات والردود"
+    },
+    "createTicket": {
+        "Create Ticket": "إنشاء تذكرة",
+        "Search for a problem (with clear keywords like 'Forgot Password')": "ابحث أولا عن مشكلة (بكلمات رئيسية واضحة كمثال 'نسيت كلمة المرور')",
+        "Search to display results": "ابحث لعرض النتائج",
+        "Sorry, no results found": "عذرا لا توجد نتائج",
+        "Type": "النوع",
+        "Department": "الجهة",
+        "Team": "الفريق",
+        "Attachments required": "يتطلب إضافة مرفقات",
+        "No": "لا",
+        "Yes": "نعم",
+        "Processing Time": "مدة المعالجة",
+        "Proposed Solution": "الحل المقترح",
+        "Do you want to open a ticket in the same category?": "هل تريد فتح تذكرة في ذات التصنيف؟",
+        "I want to open a new ticket": "أريد فتح تذكرة جديدة",
+        "Open a New Ticket": "فتح تذكرة جديدة",
+        "Select Ticket Category": "حدد تصنيف التذكرة",
+        "Academic Affairs": "شؤون أكاديمية",
+        "Human Resources": "شؤون الموارد البشرية",
+        "Technical Support": "شؤون تقنية",
+        "Ticket Title": "عنوان التذكرة",
+        "Select a suitable title for the ticket": "حدد عنوان مناسب للتذكرة",
+        "Ticket Type": "نوع التذكرة",
+        "Select the ticket type": "حدد نوع التذكرة",
+        "Ticket Description": "وصف التذكرة",
+        "Please provide a clear and concise description": "فضلا وضع وصف مناسب وواضح",
+        "Add Attachments": "إضافة المرفقات",
+        "Optional": "إختياري",
+        "Submit": "ارسال"
+    },
+    "faculty": {
+        "activated": "مفعل",
+        "disabled": "غير مفعل",
+        "Submit": "ارسال"
+    } ,
+    "certificate_request": {
+        "new": "new",
+        "accepted": "مقبول",
+        "rejected": " مرفوض"
+    } ,
+    "certificate": {
+        "new": "new",
+        "accepted": "مقبول",
+        "rejected": " مرفوض"
+    } ,
+    "program": {
+        "yes": "نعم",
+        "no": "لا",
+        "month": "شهر",
+        "week": "اسبوع",
+        "year": "عام"   ,
+
+        "vacation": {
+            "1": "تحت الإجراء",
+            "2": "مقبول",
+            "3": "مرفوض"
+        }  ,
+        "vacation_type": {
+            "1": " اعتيادية",
+            "2": "اضطرارية",
+            "3": "تعليمية"
+        }
+    },
+    "trainingLetters": {
+        "pending_authority": "بإنتظار موافقة الجهه",
+        "approved": "مقبول",
+        "rejected": "مرفوض",
+        "pending_coordinator": "بإنتظار تدقيق المنسق",
+        "request_edits": "طلب تعديل"
+
+    },
+    "evaluation": {
+        "approved": "مقبول",
+        "pending": "تحت الإجراء"
+    },
+    "certificateRequests": {
+        "approved": "مقبول",
+        "rejected": "مرفوض",
+        "pending": "تحت الإجراء"
+    },
+    "authority": {
+        "approved": "مقبول",
+        "rejected": "مرفوض",
+        "pending": "تحت الإجراء"
+    }
+
+}

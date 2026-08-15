@@ -1,0 +1,11 @@
+{
+    "name": "Album",
+    "alias": "album",
+    "description": "Engineering albums, media, purchases and payments module",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Album\\Providers\\AlbumServiceProvider"
+    ],
+    "files": []
+}
