@@ -64,8 +64,8 @@ watch(() => search.value, (newSearch, oldSearch) => {
         <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-gray-100">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center gap-4">
                 <Link href="/" class="shrink-0 flex items-center gap-2 font-bold text-xl text-gray-900">
-                    <span class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center text-sm">EO</span>
-                    <span class="hidden sm:inline">Engineering Office</span>
+                    <span class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center text-sm">STR</span>
+                    <span class="hidden sm:inline">STR-AI</span>
                 </Link>
 
                 <form class="flex-1 max-w-xl" @submit.prevent="submitSearch">
@@ -121,7 +121,7 @@ watch(() => search.value, (newSearch, oldSearch) => {
 
         <footer class="border-t border-gray-100 bg-white mt-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-sm text-gray-500 flex flex-col sm:flex-row items-center justify-between gap-2">
-                <span>&copy; {{ new Date().getFullYear() }} Engineering Office. All rights reserved.</span>
+                <span>&copy; {{ new Date().getFullYear() }} STR-AI. All rights reserved.</span>
                 <span>Structural, civil & architectural drawings, delivered securely.</span>
             </div>
         </footer>

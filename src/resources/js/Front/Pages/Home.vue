@@ -143,6 +143,7 @@ function formatPrice(album) {
                         :src="album.cover_image.thumbnail_url || album.cover_image.url"
                         :alt="album.title"
                         loading="lazy"
+                        style="min-height: 200px;max-height: 200px;"
                         class="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     <div v-else class="w-full aspect-[4/3] flex items-center justify-center text-gray-300 text-4xl">📐</div>

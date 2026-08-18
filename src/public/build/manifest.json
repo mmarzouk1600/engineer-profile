@@ -150,7 +150,7 @@
     "src": "resources/js/Front/Pages/Auth/Register.vue"
   },
   "resources/js/Front/Pages/Home.vue": {
-    "file": "assets/Home-3bc7148c.js",
+    "file": "assets/Home-abbfad0b.js",
     "imports": [
       "_Pagination-5bedabe6.js"
     ],
@@ -251,7 +251,7 @@
       "resources/js/Pages/Dashboard.vue",
       "resources/js/Pages/Purchases/Index.vue"
     ],
-    "file": "assets/app-1d364952.js",
+    "file": "assets/app-b249ebfc.js",
     "imports": [
       "_Pagination-5bedabe6.js"
     ],
@@ -340,7 +340,7 @@
       "resources/js/Front/Pages/Auth/Register.vue",
       "resources/js/Front/Pages/Home.vue"
     ],
-    "file": "assets/front-84f5d1f9.js",
+    "file": "assets/front-360d2083.js",
     "imports": [
       "_Pagination-5bedabe6.js"
     ],

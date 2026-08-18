@@ -35,7 +35,7 @@ function logout() {
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
         >
             <div class="h-16 flex items-center gap-2 px-6 font-bold text-white text-lg border-b border-gray-800">
-                <span class="w-8 h-8 rounded-xl bg-rose-600 flex items-center justify-center text-sm">EO</span>
+                <span class="w-8 h-8 rounded-xl bg-rose-600 flex items-center justify-center text-sm">STR</span>
                 Admin
             </div>
             <nav class="p-4 space-y-1">
